@@ -2,6 +2,10 @@ package com.example.will.broadcasereciever;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -19,6 +23,7 @@ public class MainActivity extends Activity {
     private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<IncomingNumber> mArrayList = new ArrayList<>();
     private RecyclerAdapter mAdapter;
+    private BroadcastReceiver mBroadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +44,14 @@ public class MainActivity extends Activity {
 
         //call methods
         readFromDb();
+
+        //initialize broadcastReciver
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                readFromDb();
+            }
+        };
     }
 
     //read the data and display
@@ -70,5 +83,17 @@ public class MainActivity extends Activity {
             mRecyclerView.setVisibility(View.VISIBLE);
             mTextView.setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(mBroadcastReceiver, new IntentFilter(DBContract.UPDATE_UI_FILTER));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(mBroadcastReceiver);
     }
 }
